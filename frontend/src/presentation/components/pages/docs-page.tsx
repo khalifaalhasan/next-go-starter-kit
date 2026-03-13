@@ -124,7 +124,7 @@ bun dev       # or: npm run dev`} />
                 </p>
                 <div className="rounded-lg border border-border/50 bg-card/30 p-4 font-mono text-sm space-y-1">
                     <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground">admin@gns.com</span></div>
-                    <div><span className="text-muted-foreground">Password:</span> <span className="text-foreground">admin@123</span></div>
+                    <div><span className="text-muted-foreground">Password:</span> <span className="text-foreground">admin123</span></div>
                 </div>
             </SubSection>
         </div>
