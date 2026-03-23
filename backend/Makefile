@@ -9,12 +9,12 @@ DEV_COMPOSE_FILE=docker-compose.dev.yaml
 MIGRATE_DIR=migrations
 
 # Database configuration
-include .env
+-include .env
 export
 
 # install dipendencies
 init:
-	go install github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
 ### up container
 up:
@@ -58,6 +58,11 @@ migrate-force:
 	fi
 	migrate -path $(MIGRATE_DIR) -database "postgresql://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(DB_SSLMODE)" force $(version)
 
+### Run database seeders
+seed:
+	@echo "Running seeders..."
+	docker exec -i gns-postgres-dev psql -U $(DB_USER) -d $(DB_NAME) < ./migrations/seeders/rbac_seeder.sql
+
 ### Access PostgreSQL shell
 db-shell:
 	docker exec -it gns-postgres-dev psql -U $(DB_USER) -d $(DB_NAME)
@@ -74,6 +79,13 @@ dev-down:
 dev-clean:
 	docker-compose -f $(DEV_COMPOSE_FILE) down -v
 	docker-compose -f $(DEV_COMPOSE_FILE) up --build
+
+logs:
+	docker-compose -f $(DEV_COMPOSE_FILE) logs -f app
+
+restart:
+	docker-compose -f $(DEV_COMPOSE_FILE) restart app
+
 
 ### Help
 help:

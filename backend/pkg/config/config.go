@@ -36,5 +36,8 @@ func LoadConfig(path string) {
 }
 
 func GetConfig() *Config {
+	if cfg == nil {
+		LoadConfig("config/config.development.yaml")
+	}
 	return cfg
 }
