@@ -31,7 +31,7 @@ ENV CACHE_DB=${CACHE_DB}
 ENV SUPABASE_URL=${SUPABASE_URL}
 ENV SUPABASE_KEY=${SUPABASE_KEY}
 
-RUN envsubst < ./config/config.template.yaml > ./config/config.staging.yaml
+RUN envsubst < ./config/config.template.yaml:z > ./config/config.staging.yaml
 
 RUN go build -o main cmd/api/main.go
 
