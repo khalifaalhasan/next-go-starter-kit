@@ -97,6 +97,38 @@ func (h Handler) GetAll(w http.ResponseWriter, r *http.Request) {
 	response.ResponseJSON(w, statusCode, res)
 }
 
+func (h Handler) GetPublishedBlogs(w http.ResponseWriter, r *http.Request) {
+	limitStr := r.URL.Query().Get("limit")
+	offsetStr := r.URL.Query().Get("offset")
+
+	limit, _ := strconv.Atoi(limitStr)
+	offset, _ := strconv.Atoi(offsetStr)
+
+	if limit <= 0 {
+		limit = 10
+	}
+
+	res, statusCode, err := h.service.GetPublishedBlogs(r.Context(), limit, offset)
+	if err != nil {
+		response.ResponseError(w, statusCode, err.Error())
+		return
+	}
+
+	response.ResponseJSON(w, statusCode, res)
+}
+
+func (h Handler) GetPublishedBySlug(w http.ResponseWriter, r *http.Request) {
+	slug := chi.URLParam(r, "slug")
+
+	res, statusCode, err := h.service.GetPublishedBySlug(r.Context(), slug)
+	if err != nil {
+		response.ResponseError(w, statusCode, err.Error())
+		return
+	}
+
+	response.ResponseJSON(w, statusCode, res)
+}
+
 func (h Handler) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)

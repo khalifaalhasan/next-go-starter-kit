@@ -18,6 +18,7 @@ type Service interface {
 	GetByID(ctx context.Context, id uuid.UUID) (*CategoryResponse, int, error)
 	GetBySlug(ctx context.Context, slug string) (*CategoryResponse, int, error)
 	GetAll(ctx context.Context) ([]CategoryResponse, int, error)
+	GetActive(ctx context.Context) ([]CategoryResponse, int, error)
 	Update(ctx context.Context, id uuid.UUID, req UpdateCategoryRequest) (*CategoryResponse, int, error)
 	Delete(ctx context.Context, id uuid.UUID) (int, error)
 }
@@ -91,6 +92,12 @@ func (s *service) GetAll(ctx context.Context) ([]CategoryResponse, int, error) {
 	}
 
 	return responses, http.StatusOK, nil
+}
+
+func (s *service) GetActive(ctx context.Context) ([]CategoryResponse, int, error) {
+	// Categories without IsActive field are 'active' if they are not soft-deleted.
+	// GORM's FindAll automatically excludes soft-deleted records.
+	return s.GetAll(ctx)
 }
 
 func (s *service) Update(ctx context.Context, id uuid.UUID, req UpdateCategoryRequest) (*CategoryResponse, int, error) {

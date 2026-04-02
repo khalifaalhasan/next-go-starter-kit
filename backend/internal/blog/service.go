@@ -18,6 +18,8 @@ type Service interface {
 	GetByID(ctx context.Context, id uuid.UUID) (*BlogResponse, int, error)
 	GetBySlug(ctx context.Context, slug string) (*BlogResponse, int, error)
 	GetAll(ctx context.Context, limit, offset int, status string) ([]BlogResponse, int, error)
+	GetPublishedBlogs(ctx context.Context, limit, offset int) ([]BlogResponse, int, error)
+	GetPublishedBySlug(ctx context.Context, slug string) (*BlogResponse, int, error)
 	Update(ctx context.Context, id uuid.UUID, req UpdateBlogRequest) (*BlogResponse, int, error)
 	Delete(ctx context.Context, id uuid.UUID) (int, error)
 }
@@ -108,6 +110,30 @@ func (s *service) GetAll(ctx context.Context, limit, offset int, status string) 
 	}
 
 	return responses, http.StatusOK, nil
+}
+
+func (s *service) GetPublishedBlogs(ctx context.Context, limit, offset int) ([]BlogResponse, int, error) {
+	// Re-uses GetAll with 'published' status hardcoded
+	return s.GetAll(ctx, limit, offset, "published")
+}
+
+func (s *service) GetPublishedBySlug(ctx context.Context, slug string) (*BlogResponse, int, error) {
+	blog, err := s.repo.FindBySlug(ctx, slug)
+	if err != nil {
+		if errors.Is(err, ErrBlogNotFound) {
+			return nil, http.StatusNotFound, err
+		}
+		logrus.WithError(err).Error("Failed to get blog by slug")
+		return nil, http.StatusInternalServerError, errors.New("failed to get blog")
+	}
+
+	// Double check if it's really published
+	if blog.Status != "published" {
+		return nil, http.StatusNotFound, ErrBlogNotFound
+	}
+
+	resp := s.mapToResponse(blog)
+	return &resp, http.StatusOK, nil
 }
 
 func (s *service) Update(ctx context.Context, id uuid.UUID, req UpdateBlogRequest) (*BlogResponse, int, error) {
