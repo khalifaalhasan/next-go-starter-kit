@@ -62,6 +62,7 @@ migrate-force:
 seed:
 	@echo "Running seeders..."
 	docker exec -i gns-postgres-dev psql -U $(DB_USER) -d $(DB_NAME) < ./migrations/seeders/rbac_seeder.sql
+	docker exec -i gns-postgres-dev psql -U $(DB_USER) -d $(DB_NAME) < ./migrations/seeders/categories_blogs_seeder.sql
 
 ### Access PostgreSQL shell
 db-shell:
@@ -83,8 +84,14 @@ dev-clean:
 logs:
 	docker-compose -f $(DEV_COMPOSE_FILE) logs -f app
 
-restart:
+restart-web:
 	docker-compose -f $(DEV_COMPOSE_FILE) restart app
+
+restart-db:
+	docker-compose -f $(DEV_COMPOSE_FILE) restart postgres
+
+restart-all:
+	docker-compose -f $(DEV_COMPOSE_FILE) restart
 
 
 ### Help
