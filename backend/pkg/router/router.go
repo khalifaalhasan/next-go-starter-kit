@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"github.com/base-go/backend/internal/auth"
+	"github.com/base-go/backend/internal/blog"
+	"github.com/base-go/backend/internal/category"
 	"github.com/base-go/backend/internal/rbac"
 	"github.com/base-go/backend/pkg/middleware"
 	"github.com/base-go/backend/pkg/response"
@@ -21,6 +23,8 @@ func SetupRoutes(
 	authHandler auth.Handler,
 	rbacHandler rbac.Handler,
 	rbacRepo rbac.Repository,
+	categoryHandler category.Handler,
+	blogHandler blog.Handler,
 ) *chi.Mux {
 	mux := chi.NewRouter()
 
@@ -142,6 +146,38 @@ func SetupRoutes(
 				r.Delete("/", authHandler.DeleteUser)
 				r.Post("/toggle-status", authHandler.ToggleUserStatus)
 				r.Post("/restore", authHandler.RestoreUser)
+			})
+		})
+		// Category routes
+		r.Route("/categories", func(r chi.Router) {
+			r.Get("/", categoryHandler.GetAll)
+			r.Get("/{id}", categoryHandler.GetByID)
+			r.Get("/slug/{slug}", categoryHandler.GetBySlug)
+
+			// Protected routes
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.JWTAuthMiddleware)
+				r.Use(middleware.RequireRole("Super Admin", "Admin", "Editor"))
+				r.Post("/", categoryHandler.Create)
+				r.Put("/{id}", categoryHandler.Update)
+				r.Delete("/{id}", categoryHandler.Delete)
+			})
+		})
+
+		// Blog routes
+		r.Route("/blogs", func(r chi.Router) {
+			r.Get("/", blogHandler.GetAll)
+			r.Get("/{id}", blogHandler.GetByID)
+			r.Get("/slug/{slug}", blogHandler.GetBySlug)
+
+			// Protected routes
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.JWTAuthMiddleware)
+				// Authors and Admins/Editors can manage blogs
+				r.Use(middleware.RequireRole("Super Admin", "Admin", "Editor", "Author"))
+				r.Post("/", blogHandler.Create)
+				r.Put("/{id}", blogHandler.Update)
+				r.Delete("/{id}", blogHandler.Delete)
 			})
 		})
 	})

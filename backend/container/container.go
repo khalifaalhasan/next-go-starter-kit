@@ -5,6 +5,8 @@ import (
 	"go.uber.org/dig"
 
 	"github.com/base-go/backend/internal/auth"
+	"github.com/base-go/backend/internal/blog"
+	"github.com/base-go/backend/internal/category"
 	"github.com/base-go/backend/internal/rbac"
 	"github.com/base-go/backend/pkg/cache"
 	"github.com/base-go/backend/pkg/database"
@@ -54,7 +56,27 @@ func New() (*dig.Container, error) {
 	}
 
 	// other domain
+	// category module
+	if err := container.Provide(category.NewRepository); err != nil {
+		return nil, err
+	}
+	if err := container.Provide(category.NewService); err != nil {
+		return nil, err
+	}
+	if err := container.Provide(category.NewHandler); err != nil {
+		return nil, err
+	}
 
+	// blog module
+	if err := container.Provide(blog.NewRepository); err != nil {
+		return nil, err
+	}
+	if err := container.Provide(blog.NewService); err != nil {
+		return nil, err
+	}
+	if err := container.Provide(blog.NewHandler); err != nil {
+		return nil, err
+	}
 	// end
 
 	if err := container.Provide(router.SetupRoutes); err != nil {
