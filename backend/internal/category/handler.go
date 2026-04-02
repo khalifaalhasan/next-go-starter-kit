@@ -73,6 +73,16 @@ func (h Handler) GetAll(w http.ResponseWriter, r *http.Request) {
 	response.ResponseJSON(w, statusCode, res)
 }
 
+func (h Handler) GetActive(w http.ResponseWriter, r *http.Request) {
+	res, statusCode, err := h.service.GetActive(r.Context())
+	if err != nil {
+		response.ResponseError(w, statusCode, err.Error())
+		return
+	}
+
+	response.ResponseJSON(w, statusCode, res)
+}
+
 func (h Handler) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)

@@ -8,6 +8,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
+	"github.com/sirupsen/logrus"
 	"github.com/base-go/backend/pkg/cache"
 	"github.com/base-go/backend/pkg/config"
 	"github.com/base-go/backend/pkg/response"
@@ -62,7 +63,7 @@ func JWTAuthMiddleware(next http.Handler) http.Handler {
 
 		if len(strings.Split(tokenStr, ".")) != 3 {
 			res.Code = http.StatusUnauthorized
-			res.Message = "Invalid token"
+			res.Message = "Invalid token: format is not three parts"
 			response.ResponseJSON(w, res.Code, res)
 
 			return
@@ -77,9 +78,17 @@ func JWTAuthMiddleware(next http.Handler) http.Handler {
 			return []byte(cfg.Auth.JwtSecret), nil
 		})
 
-		if err != nil || !token.Valid {
+		if err != nil {
+			logrus.WithError(err).Error("JWT Parse Error")
 			res.Code = http.StatusUnauthorized
-			res.Message = "Invalid token"
+			res.Message = fmt.Sprintf("Invalid token: parse error. Details: %v", err)
+			response.ResponseJSON(w, res.Code, res)
+			return
+		}
+		
+		if !token.Valid {
+			res.Code = http.StatusUnauthorized
+			res.Message = "Invalid token: token is not valid"
 			response.ResponseJSON(w, res.Code, res)
 
 			return
@@ -99,8 +108,10 @@ func JWTAuthMiddleware(next http.Handler) http.Handler {
 
 		accessTokenValue, err := ch.Get(ctx, accessTokenKey)
 		if accessTokenValue != tokenStr {
+			logrus.Infof("Redis Token: %s", accessTokenValue)
+			logrus.Infof("Header Token: %s", tokenStr)
 			res.Code = http.StatusUnauthorized
-			res.Message = "Invalid token"
+			res.Message = "Invalid token: value does not match redis cache session"
 			response.ResponseJSON(w, res.Code, res)
 
 			return
