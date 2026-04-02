@@ -63,121 +63,144 @@ func SetupRoutes(
 	// set prefix v1
 	mux.Route("/v1", func(r chi.Router) {
 
-		// Authentication routes (public)
-		r.Route("/auth", func(r chi.Router) {
-			r.Post("/register", authHandler.Register)
-			r.Post("/login", authHandler.Login)
-			r.Post("/oauth/google", authHandler.LoginWithGoogle)
-			r.Post("/refresh", authHandler.RefreshToken)
+		// ==========================================
+		// PUBLIC NAMESPACE
+		// ==========================================
+		r.Route("/public", func(r chi.Router) {
+			
+			// Auth Routes (Public)
+			r.Route("/auth", func(r chi.Router) {
+				// No registration point in public namespace (closed system)
+				r.Post("/login", authHandler.Login)
+				r.Post("/oauth/google", authHandler.LoginWithGoogle)
+				r.Post("/refresh", authHandler.RefreshToken)
+			})
 
-			// Protected auth routes
-			r.Group(func(r chi.Router) {
-				r.Use(middleware.JWTAuthMiddleware)
+			// Categories (Read-Only Public)
+			r.Route("/categories", func(r chi.Router) {
+				// Supports Search & Sort via Query Parameters
+				r.Get("/", categoryHandler.GetActive)
+				r.Get("/{id}", categoryHandler.GetByID)
+				r.Get("/slug/{slug}", categoryHandler.GetBySlug)
+			})
+
+			// Blogs (Read-Only Public)
+			r.Route("/blogs", func(r chi.Router) {
+				// Supports Search & Sort via Query Parameters
+				r.Get("/", blogHandler.GetPublishedBlogs)
+				r.Get("/{id}", blogHandler.GetByID)
+				r.Get("/slug/{slug}", blogHandler.GetPublishedBySlug)
+			})
+		})
+
+		// ==========================================
+		// ADMIN NAMESPACE (Protected by Global JWT)
+		// ==========================================
+		r.Route("/admin", func(r chi.Router) {
+			// Apply JWT protection for all /admin routes
+			r.Use(middleware.JWTAuthMiddleware)
+
+			// Auth Routes (Protected)
+			r.Route("/auth", func(r chi.Router) {
 				r.Post("/logout", authHandler.Logout)
-				r.Get("/profile", authHandler.GetProfile)
-				r.Put("/profile", authHandler.UpdateProfile)
+			})
+
+			// Profile Management
+			r.Route("/profile", func(r chi.Router) {
+				r.Get("/", authHandler.GetProfile)
+				r.Put("/", authHandler.UpdateProfile)
 				r.Post("/change-password", authHandler.ChangePassword)
 			})
-		})
 
-		// RBAC routes (protected, admin only)
-		r.Route("/rbac", func(r chi.Router) {
-			r.Use(middleware.JWTAuthMiddleware)
-			r.Use(middleware.RequireRole("Super Admin", "Admin"))
-
-			// Roles
-			r.Route("/roles", func(r chi.Router) {
-				r.Post("/", rbacHandler.CreateRole)
-				r.Get("/", rbacHandler.GetAllRoles)
-
-				r.Route("/{id}", func(r chi.Router) {
-					r.Get("/", rbacHandler.GetRoleByID)
-					r.Put("/", rbacHandler.UpdateRole)
-					r.Delete("/", rbacHandler.DeleteRole)
-
-					// Role permissions
-					r.Post("/permissions", rbacHandler.AssignPermissionsToRole)
-					r.Get("/permissions", rbacHandler.GetRolePermissions)
-
-					// Module access
-					r.Post("/module-access", rbacHandler.UpdateModuleAccess)
-					r.Get("/module-access", rbacHandler.GetModuleAccessByRole)
-				})
-			})
-
-			// Permissions
-			r.Route("/permissions", func(r chi.Router) {
-				r.Post("/", rbacHandler.CreatePermission)
-				r.Get("/", rbacHandler.GetAllPermissions)
-				r.Get("/by-module", rbacHandler.GetPermissionsByModule)
-
-				r.Route("/{id}", func(r chi.Router) {
-					r.Get("/", rbacHandler.GetPermissionByID)
-					r.Put("/", rbacHandler.UpdatePermission)
-					r.Delete("/", rbacHandler.DeletePermission)
-				})
-			})
-
-			// User roles
-			r.Route("/users/{userId}/roles", func(r chi.Router) {
-				r.Post("/", rbacHandler.AssignRolesToUser)
-				r.Get("/", rbacHandler.GetUserRoles)
-			})
-
-			// Permission checking (available to all authenticated users)
-			r.Group(func(r chi.Router) {
-				r.Post("/check-permission", rbacHandler.CheckPermission)
-				r.Post("/check-module-access", rbacHandler.CheckModuleAccess)
-			})
-		})
-
-		// User management routes (protected - Admin only)
-		r.Route("/users", func(r chi.Router) {
-			r.Use(middleware.JWTAuthMiddleware)
-			r.Use(middleware.RequireRole("Super Admin", "Admin"))
-
-			r.Get("/", authHandler.ListUsers)
-			r.Post("/", authHandler.CreateUser)
-			r.Get("/deleted", authHandler.ListDeletedUsers)
-
-			r.Route("/{id}", func(r chi.Router) {
-				r.Get("/", authHandler.GetUserByID)
-				r.Put("/", authHandler.UpdateUser)
-				r.Delete("/", authHandler.DeleteUser)
-				r.Post("/toggle-status", authHandler.ToggleUserStatus)
-				r.Post("/restore", authHandler.RestoreUser)
-			})
-		})
-		// Category routes
-		r.Route("/categories", func(r chi.Router) {
-			r.Get("/", categoryHandler.GetAll)
-			r.Get("/{id}", categoryHandler.GetByID)
-			r.Get("/slug/{slug}", categoryHandler.GetBySlug)
-
-			// Protected routes
-			r.Group(func(r chi.Router) {
-				r.Use(middleware.JWTAuthMiddleware)
+			// Categories CRUD (Admin/Editor)
+			r.Route("/categories", func(r chi.Router) {
 				r.Use(middleware.RequireRole("Super Admin", "Admin", "Editor"))
+				
+				// Supports Search & Pagination via Query Parameters
+				r.Get("/", categoryHandler.GetAll)
+				r.Get("/{id}", categoryHandler.GetByID)
 				r.Post("/", categoryHandler.Create)
 				r.Put("/{id}", categoryHandler.Update)
 				r.Delete("/{id}", categoryHandler.Delete)
 			})
-		})
 
-		// Blog routes
-		r.Route("/blogs", func(r chi.Router) {
-			r.Get("/", blogHandler.GetAll)
-			r.Get("/{id}", blogHandler.GetByID)
-			r.Get("/slug/{slug}", blogHandler.GetBySlug)
-
-			// Protected routes
-			r.Group(func(r chi.Router) {
-				r.Use(middleware.JWTAuthMiddleware)
-				// Authors and Admins/Editors can manage blogs
+			// Blogs CRUD (Author/Editor/Admin)
+			r.Route("/blogs", func(r chi.Router) {
 				r.Use(middleware.RequireRole("Super Admin", "Admin", "Editor", "Author"))
+				
+				// Supports Search & Pagination via Query Parameters
+				r.Get("/", blogHandler.GetAll)
+				r.Get("/{id}", blogHandler.GetByID)
 				r.Post("/", blogHandler.Create)
 				r.Put("/{id}", blogHandler.Update)
 				r.Delete("/{id}", blogHandler.Delete)
+			})
+
+			// User Management (Super Admin only)
+			r.Route("/users", func(r chi.Router) {
+				r.Use(middleware.RequireRole("Super Admin"))
+				
+				r.Get("/", authHandler.ListUsers)
+				r.Post("/", authHandler.CreateUser)
+				r.Get("/deleted", authHandler.ListDeletedUsers)
+
+				r.Route("/{id}", func(r chi.Router) {
+					r.Get("/", authHandler.GetUserByID)
+					r.Put("/", authHandler.UpdateUser)
+					r.Delete("/", authHandler.DeleteUser)
+					r.Post("/toggle-status", authHandler.ToggleUserStatus)
+					r.Post("/restore", authHandler.RestoreUser)
+				})
+			})
+
+			// RBAC / Roles & Permissions Management (Super Admin & Admin)
+			r.Route("/rbac", func(r chi.Router) {
+				r.Use(middleware.RequireRole("Super Admin", "Admin"))
+
+				// Roles
+				r.Route("/roles", func(r chi.Router) {
+					r.Post("/", rbacHandler.CreateRole)
+					r.Get("/", rbacHandler.GetAllRoles)
+
+					r.Route("/{id}", func(r chi.Router) {
+						r.Get("/", rbacHandler.GetRoleByID)
+						r.Put("/", rbacHandler.UpdateRole)
+						r.Delete("/", rbacHandler.DeleteRole)
+
+						// Role permissions
+						r.Post("/permissions", rbacHandler.AssignPermissionsToRole)
+						r.Get("/permissions", rbacHandler.GetRolePermissions)
+
+						// Module access
+						r.Post("/module-access", rbacHandler.UpdateModuleAccess)
+						r.Get("/module-access", rbacHandler.GetModuleAccessByRole)
+					})
+				})
+
+				// Permissions
+				r.Route("/permissions", func(r chi.Router) {
+					r.Post("/", rbacHandler.CreatePermission)
+					r.Get("/", rbacHandler.GetAllPermissions)
+					r.Get("/by-module", rbacHandler.GetPermissionsByModule)
+
+					r.Route("/{id}", func(r chi.Router) {
+						r.Get("/", rbacHandler.GetPermissionByID)
+						r.Put("/", rbacHandler.UpdatePermission)
+						r.Delete("/", rbacHandler.DeletePermission)
+					})
+				})
+
+				// User roles mapping
+				r.Route("/users/{userId}/roles", func(r chi.Router) {
+					r.Post("/", rbacHandler.AssignRolesToUser)
+					r.Get("/", rbacHandler.GetUserRoles)
+				})
+
+				// Permission checking endpoints
+				r.Group(func(r chi.Router) {
+					r.Post("/check-permission", rbacHandler.CheckPermission)
+					r.Post("/check-module-access", rbacHandler.CheckModuleAccess)
+				})
 			})
 		})
 	})
