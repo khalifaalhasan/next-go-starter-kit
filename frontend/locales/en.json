@@ -23,11 +23,18 @@
   },
   "nav": {
     "home": "Home",
+    "profile": "Profile",
+    "admission": "Admission",
+    "span_ptkin": "Span PTKIN",
+    "um_ptkin": "UM PTKIN",
+    "mandiri": "Mandiri",
+    "news": "News",
+    "research": "Research & Innovation",
+    "academic": "Academic",
+    "zawiyah": "Zawiyah",
+    "settings": "Settings",
     "login": "Login",
     "logout": "Logout",
-    "register": "Register",
-    "profile": "Profile",
-    "preferences": "Preferences",
     "admin": "Admin"
   },
   "landing": {

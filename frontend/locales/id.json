@@ -23,12 +23,18 @@
   },
   "nav": {
     "home": "Beranda",
+    "profile": "Profil",
+    "admission": "Pendaftaran",
+    "span_ptkin": "Span PTKIN",
+    "um_ptkin": "UM PTKIN",
+    "mandiri": "Mandiri",
+    "news": "Berita",
+    "research": "Riset dan Inovasi",
+    "academic": "Akademik",
+    "zawiyah": "Zawiyah",
     "settings": "Pengaturan",
     "login": "Masuk",
     "logout": "Keluar",
-    "register": "Daftar",
-    "profile": "Profil",
-    "preferences": "Preferensi",
     "admin": "Admin"
   },
   "landing": {
