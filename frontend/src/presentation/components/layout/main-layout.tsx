@@ -12,15 +12,15 @@ export function MainLayout({ children }: MainLayoutProps) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-white">
             <Sidebar
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
             />
 
-            <div className="lg:pl-[280px]">
+            <div className="flex flex-col">
                 <Navbar onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} />
-                <main className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
+                <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {children}
                 </main>
             </div>
