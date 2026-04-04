@@ -63,6 +63,7 @@ seed:
 	@echo "Running seeders..."
 	docker exec -i gns-postgres-dev psql -U $(DB_USER) -d $(DB_NAME) < ./migrations/seeders/rbac_seeder.sql
 	docker exec -i gns-postgres-dev psql -U $(DB_USER) -d $(DB_NAME) < ./migrations/seeders/categories_blogs_seeder.sql
+	docker exec -i gns-postgres-dev psql -U $(DB_USER) -d $(DB_NAME) < ./migrations/seeders/extra_blogs_seeder.sql
 
 ### Access PostgreSQL shell
 db-shell:

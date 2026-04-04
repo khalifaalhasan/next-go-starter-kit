@@ -17,8 +17,8 @@ type Service interface {
 	Create(ctx context.Context, authorID uuid.UUID, req CreateBlogRequest) (*BlogResponse, int, error)
 	GetByID(ctx context.Context, id uuid.UUID) (*BlogResponse, int, error)
 	GetBySlug(ctx context.Context, slug string) (*BlogResponse, int, error)
-	GetAll(ctx context.Context, limit, offset int, status string) ([]BlogResponse, int, error)
-	GetPublishedBlogs(ctx context.Context, limit, offset int) ([]BlogResponse, int, error)
+	GetAll(ctx context.Context, limit, offset int, status string) (*BlogListResponse, int, error)
+	GetPublishedBlogs(ctx context.Context, limit, offset int) (*BlogListResponse, int, error)
 	GetPublishedBySlug(ctx context.Context, slug string) (*BlogResponse, int, error)
 	Update(ctx context.Context, id uuid.UUID, req UpdateBlogRequest) (*BlogResponse, int, error)
 	Delete(ctx context.Context, id uuid.UUID) (int, error)
@@ -97,8 +97,8 @@ func (s *service) GetBySlug(ctx context.Context, slug string) (*BlogResponse, in
 	return &resp, http.StatusOK, nil
 }
 
-func (s *service) GetAll(ctx context.Context, limit, offset int, status string) ([]BlogResponse, int, error) {
-	blogs, err := s.repo.FindAll(ctx, limit, offset, status)
+func (s *service) GetAll(ctx context.Context, limit, offset int, status string) (*BlogListResponse, int, error) {
+	blogs, total, err := s.repo.FindAll(ctx, limit, offset, status)
 	if err != nil {
 		logrus.WithError(err).Error("Failed to get all blogs")
 		return nil, http.StatusInternalServerError, errors.New("failed to get blogs")
@@ -109,10 +109,23 @@ func (s *service) GetAll(ctx context.Context, limit, offset int, status string) 
 		responses[i] = s.mapToResponse(&b)
 	}
 
-	return responses, http.StatusOK, nil
+	totalPages := 0
+	if limit > 0 {
+		totalPages = int((total + int64(limit) - 1) / int64(limit))
+	}
+
+	currentPage := (offset / limit) + 1
+
+	return &BlogListResponse{
+		Items:      responses,
+		Total:      total,
+		Page:       currentPage,
+		PageSize:   limit,
+		TotalPages: totalPages,
+	}, http.StatusOK, nil
 }
 
-func (s *service) GetPublishedBlogs(ctx context.Context, limit, offset int) ([]BlogResponse, int, error) {
+func (s *service) GetPublishedBlogs(ctx context.Context, limit, offset int) (*BlogListResponse, int, error) {
 	// Re-uses GetAll with 'published' status hardcoded
 	return s.GetAll(ctx, limit, offset, "published")
 }

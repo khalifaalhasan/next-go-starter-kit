@@ -78,15 +78,20 @@ func (h Handler) GetBySlug(w http.ResponseWriter, r *http.Request) {
 
 func (h Handler) GetAll(w http.ResponseWriter, r *http.Request) {
 	limitStr := r.URL.Query().Get("limit")
-	offsetStr := r.URL.Query().Get("offset")
+	pageStr := r.URL.Query().Get("page")
 	status := r.URL.Query().Get("status")
 
 	limit, _ := strconv.Atoi(limitStr)
-	offset, _ := strconv.Atoi(offsetStr)
+	page, _ := strconv.Atoi(pageStr)
 
 	if limit <= 0 {
 		limit = 10
 	}
+	if page <= 0 {
+		page = 1
+	}
+
+	offset := (page - 1) * limit
 
 	res, statusCode, err := h.service.GetAll(r.Context(), limit, offset, status)
 	if err != nil {
@@ -99,14 +104,19 @@ func (h Handler) GetAll(w http.ResponseWriter, r *http.Request) {
 
 func (h Handler) GetPublishedBlogs(w http.ResponseWriter, r *http.Request) {
 	limitStr := r.URL.Query().Get("limit")
-	offsetStr := r.URL.Query().Get("offset")
+	pageStr := r.URL.Query().Get("page")
 
 	limit, _ := strconv.Atoi(limitStr)
-	offset, _ := strconv.Atoi(offsetStr)
+	page, _ := strconv.Atoi(pageStr)
 
 	if limit <= 0 {
 		limit = 10
 	}
+	if page <= 0 {
+		page = 1
+	}
+
+	offset := (page - 1) * limit
 
 	res, statusCode, err := h.service.GetPublishedBlogs(r.Context(), limit, offset)
 	if err != nil {

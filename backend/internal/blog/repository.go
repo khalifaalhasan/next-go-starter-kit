@@ -19,7 +19,7 @@ type Repository interface {
 	Create(ctx context.Context, blog *models.Blog) error
 	FindByID(ctx context.Context, id uuid.UUID) (*models.Blog, error)
 	FindBySlug(ctx context.Context, slug string) (*models.Blog, error)
-	FindAll(ctx context.Context, limit, offset int, status string) ([]models.Blog, error)
+	FindAll(ctx context.Context, limit, offset int, status string) ([]models.Blog, int64, error)
 	Update(ctx context.Context, blog *models.Blog) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
@@ -67,24 +67,30 @@ func (r *repository) FindBySlug(ctx context.Context, slug string) (*models.Blog,
 	return &b, nil
 }
 
-func (r *repository) FindAll(ctx context.Context, limit, offset int, status string) ([]models.Blog, error) {
+func (r *repository) FindAll(ctx context.Context, limit, offset int, status string) ([]models.Blog, int64, error) {
 	var blogs []models.Blog
-	query := r.db.GetDB().WithContext(ctx).
-		Preload("Author").
-		Preload("Category")
+	var total int64
+
+	db := r.db.GetDB().WithContext(ctx).Model(&models.Blog{})
 	
 	if status != "" {
-		query = query.Where("status = ?", status)
+		db = db.Where("status = ?", status)
 	}
 
+	if err := db.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	query := db.Preload("Author").Preload("Category")
+	
 	if limit > 0 {
 		query = query.Limit(limit).Offset(offset)
 	}
 
 	if err := query.Order("created_at desc").Find(&blogs).Error; err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return blogs, nil
+	return blogs, total, nil
 }
 
 func (r *repository) Update(ctx context.Context, blog *models.Blog) error {
