@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import { Navbar } from "@/src/presentation/components/layout/navbar";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -20,14 +21,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en"
-      className="dark"
-      style={{ colorScheme: "dark" }}
-    >
+    <html lang="en">
       <body
         className={`${poppins.variable} antialiased`}
       >
         <Providers>
+          <Navbar />
           {children}
         </Providers>
       </body>

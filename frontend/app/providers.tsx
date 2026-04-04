@@ -25,7 +25,7 @@ export function Providers({ children }: { children: ReactNode }) {
     }, [locale, hasHydrated]);
 
     // Detect theme for loading screen (before ThemeProvider renders)
-    const [isDark, setIsDark] = useState(true); // Default to dark
+    const [isDark, setIsDark] = useState(false); // Default to light
 
     useEffect(() => {
         // Check localStorage for saved theme
@@ -83,7 +83,8 @@ export function Providers({ children }: { children: ReactNode }) {
         <NextIntlClientProvider locale={hasHydrated ? locale : 'en'} messages={messages}>
             <ThemeProvider
                 attribute="class"
-                defaultTheme="dark"
+                
+                forcedTheme="light"
                 enableSystem={false}
                 disableTransitionOnChange
             >
