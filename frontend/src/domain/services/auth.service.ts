@@ -27,14 +27,6 @@ export interface AuthResponse {
   user: User;
 }
 
-/**
- * Register request payload
- */
-export interface RegisterRequest {
-  email: string;
-  password: string;
-  name: string;
-}
 
 /**
  * Login request payload
@@ -86,18 +78,10 @@ export interface ProfileResponse {
  */
 export const authService = {
   /**
-   * Register a new user
-   */
-  async register(data: RegisterRequest): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/v1/auth/register', data);
-    return response.data;
-  },
-
-  /**
    * Login with email and password
    */
   async login(data: LoginRequest): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/v1/auth/login', data);
+    const response = await apiClient.post<AuthResponse>('/v1/public/auth/login', data);
     return response.data;
   },
 
@@ -105,7 +89,7 @@ export const authService = {
    * Login with Google OAuth
    */
   async loginWithGoogle(data: GoogleOAuthRequest): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/v1/auth/oauth/google', data);
+    const response = await apiClient.post<AuthResponse>('/v1/public/auth/oauth/google', data);
     return response.data;
   },
 
@@ -113,7 +97,7 @@ export const authService = {
    * Refresh access token
    */
   async refreshToken(data: RefreshTokenRequest): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/v1/auth/refresh', data);
+    const response = await apiClient.post<AuthResponse>('/v1/public/auth/refresh', data);
     return response.data;
   },
 
@@ -121,14 +105,14 @@ export const authService = {
    * Logout (invalidate session)
    */
   async logout(): Promise<void> {
-    await apiClient.post('/v1/auth/logout');
+    await apiClient.post('/v1/admin/auth/logout');
   },
 
   /**
    * Get user profile
    */
   async getProfile(): Promise<ProfileResponse> {
-    const response = await apiClient.get<ProfileResponse>('/v1/auth/profile');
+    const response = await apiClient.get<ProfileResponse>('/v1/admin/profile');
     return response.data;
   },
 
@@ -136,7 +120,7 @@ export const authService = {
    * Update user profile
    */
   async updateProfile(data: UpdateProfileRequest): Promise<User> {
-    const response = await apiClient.put<User>('/v1/auth/profile', data);
+    const response = await apiClient.put<User>('/v1/admin/profile', data);
     return response.data;
   },
 
@@ -144,6 +128,6 @@ export const authService = {
    * Change password
    */
   async changePassword(data: ChangePasswordRequest): Promise<void> {
-    await apiClient.post('/v1/auth/change-password', data);
+    await apiClient.post('/v1/admin/profile/change-password', data);
   },
 };

@@ -123,7 +123,7 @@ export const rbacService = {
    * Get all roles
    */
   async getAllRoles(): Promise<Role[]> {
-    const response = await apiClient.get<Role[]>('/v1/rbac/roles');
+    const response = await apiClient.get<Role[]>('/v1/admin/rbac/roles');
     return response.data;
   },
 
@@ -131,7 +131,7 @@ export const rbacService = {
    * Get role by ID with permissions
    */
   async getRoleById(id: number): Promise<RoleWithPermissions> {
-    const response = await apiClient.get<RoleWithPermissions>(`/v1/rbac/roles/${id}`);
+    const response = await apiClient.get<RoleWithPermissions>(`/v1/admin/rbac/roles/${id}`);
     return response.data;
   },
 
@@ -139,7 +139,7 @@ export const rbacService = {
    * Create a new role
    */
   async createRole(data: CreateRoleRequest): Promise<Role> {
-    const response = await apiClient.post<Role>('/v1/rbac/roles', data);
+    const response = await apiClient.post<Role>('/v1/admin/rbac/roles', data);
     return response.data;
   },
 
@@ -147,7 +147,7 @@ export const rbacService = {
    * Update role
    */
   async updateRole(id: number, data: UpdateRoleRequest): Promise<Role> {
-    const response = await apiClient.put<Role>(`/v1/rbac/roles/${id}`, data);
+    const response = await apiClient.put<Role>(`/v1/admin/rbac/roles/${id}`, data);
     return response.data;
   },
 
@@ -155,7 +155,7 @@ export const rbacService = {
    * Delete role
    */
   async deleteRole(id: number): Promise<void> {
-    await apiClient.delete(`/v1/rbac/roles/${id}`);
+    await apiClient.delete(`/v1/admin/rbac/roles/${id}`);
   },
 
   // ========== Permissions ==========
@@ -164,7 +164,7 @@ export const rbacService = {
    * Get all permissions
    */
   async getAllPermissions(): Promise<Permission[]> {
-    const response = await apiClient.get<Permission[]>('/v1/rbac/permissions');
+    const response = await apiClient.get<Permission[]>('/v1/admin/rbac/permissions');
     return response.data;
   },
 
@@ -172,7 +172,7 @@ export const rbacService = {
    * Get permissions grouped by module
    */
   async getPermissionsByModule(): Promise<PermissionsByModule[]> {
-    const response = await apiClient.get<PermissionsByModule[]>('/v1/rbac/permissions/by-module');
+    const response = await apiClient.get<PermissionsByModule[]>('/v1/admin/rbac/permissions/by-module');
     return response.data;
   },
 
@@ -180,7 +180,7 @@ export const rbacService = {
    * Get permission by ID
    */
   async getPermissionById(id: number): Promise<Permission> {
-    const response = await apiClient.get<Permission>(`/v1/rbac/permissions/${id}`);
+    const response = await apiClient.get<Permission>(`/v1/admin/rbac/permissions/${id}`);
     return response.data;
   },
 
@@ -188,7 +188,7 @@ export const rbacService = {
    * Create a new permission
    */
   async createPermission(data: CreatePermissionRequest): Promise<Permission> {
-    const response = await apiClient.post<Permission>('/v1/rbac/permissions', data);
+    const response = await apiClient.post<Permission>('/v1/admin/rbac/permissions', data);
     return response.data;
   },
 
@@ -196,7 +196,7 @@ export const rbacService = {
    * Update permission
    */
   async updatePermission(id: number, data: UpdatePermissionRequest): Promise<Permission> {
-    const response = await apiClient.put<Permission>(`/v1/rbac/permissions/${id}`, data);
+    const response = await apiClient.put<Permission>(`/v1/admin/rbac/permissions/${id}`, data);
     return response.data;
   },
 
@@ -204,7 +204,7 @@ export const rbacService = {
    * Delete permission
    */
   async deletePermission(id: number): Promise<void> {
-    await apiClient.delete(`/v1/rbac/permissions/${id}`);
+    await apiClient.delete(`/v1/admin/rbac/permissions/${id}`);
   },
 
   // ========== Role-Permission Assignment ==========
@@ -213,14 +213,14 @@ export const rbacService = {
    * Assign permissions to role
    */
   async assignPermissionsToRole(roleId: number, data: AssignPermissionsRequest): Promise<void> {
-    await apiClient.post(`/v1/rbac/roles/${roleId}/permissions`, data);
+    await apiClient.post(`/v1/admin/rbac/roles/${roleId}/permissions`, data);
   },
 
   /**
    * Get role permissions
    */
   async getRolePermissions(roleId: number): Promise<Permission[]> {
-    const response = await apiClient.get<Permission[]>(`/v1/rbac/roles/${roleId}/permissions`);
+    const response = await apiClient.get<Permission[]>(`/v1/admin/rbac/roles/${roleId}/permissions`);
     return response.data;
   },
 
@@ -230,14 +230,14 @@ export const rbacService = {
    * Assign roles to user
    */
   async assignRolesToUser(userId: string, data: AssignRolesRequest): Promise<void> {
-    await apiClient.post(`/v1/rbac/users/${userId}/roles`, data);
+    await apiClient.post(`/v1/admin/rbac/users/${userId}/roles`, data);
   },
 
   /**
    * Get user roles
    */
   async getUserRoles(userId: string): Promise<Role[]> {
-    const response = await apiClient.get<Role[]>(`/v1/rbac/users/${userId}/roles`);
+    const response = await apiClient.get<Role[]>(`/v1/admin/rbac/users/${userId}/roles`);
     return response.data;
   },
 
@@ -247,7 +247,7 @@ export const rbacService = {
    * Update module access for role
    */
   async updateModuleAccess(roleId: number, data: UpdateModuleAccessRequest): Promise<ModuleAccess> {
-    const response = await apiClient.post<ModuleAccess>(`/v1/rbac/roles/${roleId}/module-access`, data);
+    const response = await apiClient.post<ModuleAccess>(`/v1/admin/rbac/roles/${roleId}/module-access`, data);
     return response.data;
   },
 
@@ -255,7 +255,7 @@ export const rbacService = {
    * Get module access by role
    */
   async getModuleAccessByRole(roleId: number): Promise<ModuleAccess[]> {
-    const response = await apiClient.get<ModuleAccess[]>(`/v1/rbac/roles/${roleId}/module-access`);
+    const response = await apiClient.get<ModuleAccess[]>(`/v1/admin/rbac/roles/${roleId}/module-access`);
     return response.data;
   },
 
@@ -265,7 +265,7 @@ export const rbacService = {
    * Check if current user has permission
    */
   async checkPermission(permission: string): Promise<boolean> {
-    const response = await apiClient.post<{ has_permission: boolean }>('/v1/rbac/check-permission', {
+    const response = await apiClient.post<{ has_permission: boolean }>('/v1/admin/rbac/check-permission', {
       permission,
     });
     return response.data.has_permission;
@@ -275,7 +275,7 @@ export const rbacService = {
    * Check if current user can access module
    */
   async checkModuleAccess(module: string, action: 'view' | 'create' | 'edit' | 'delete'): Promise<boolean> {
-    const response = await apiClient.post<{ has_access: boolean }>('/v1/rbac/check-module-access', {
+    const response = await apiClient.post<{ has_access: boolean }>('/v1/admin/rbac/check-module-access', {
       module,
       action,
     });

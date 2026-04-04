@@ -41,7 +41,7 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config;
 
     // Don't retry if this is already a refresh token request (prevent infinite loop)
-    if (originalRequest.url?.includes('/auth/refresh')) {
+    if (originalRequest.url?.includes('/v1/public/auth/refresh')) {
       return Promise.reject(error);
     }
 

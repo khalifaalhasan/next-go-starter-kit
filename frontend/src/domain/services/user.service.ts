@@ -64,7 +64,7 @@ export const userService = {
     if (params.is_active !== undefined) queryParams.set('is_active', params.is_active.toString());
     if (params.role_id) queryParams.set('role_id', params.role_id.toString());
 
-    const response = await apiClient.get<UserListResponse>(`/v1/users?${queryParams.toString()}`);
+    const response = await apiClient.get<UserListResponse>(`/v1/admin/users?${queryParams.toString()}`);
     return response.data;
   },
 
@@ -72,7 +72,7 @@ export const userService = {
    * Get user by ID
    */
   async getUser(id: string): Promise<User> {
-    const response = await apiClient.get<User>(`/v1/users/${id}`);
+    const response = await apiClient.get<User>(`/v1/admin/users/${id}`);
     return response.data;
   },
 
@@ -80,7 +80,7 @@ export const userService = {
    * Create new user
    */
   async createUser(data: CreateUserRequest): Promise<User> {
-    const response = await apiClient.post<User>('/v1/users', data);
+    const response = await apiClient.post<User>('/v1/admin/users', data);
     return response.data;
   },
 
@@ -88,7 +88,7 @@ export const userService = {
    * Update user
    */
   async updateUser(id: string, data: UpdateUserRequest): Promise<User> {
-    const response = await apiClient.put<User>(`/v1/users/${id}`, data);
+    const response = await apiClient.put<User>(`/v1/admin/users/${id}`, data);
     return response.data;
   },
 
@@ -96,14 +96,14 @@ export const userService = {
    * Delete user
    */
   async deleteUser(id: string): Promise<void> {
-    await apiClient.delete(`/v1/users/${id}`);
+    await apiClient.delete(`/v1/admin/users/${id}`);
   },
 
   /**
    * Toggle user active status
    */
   async toggleUserStatus(id: string): Promise<User> {
-    const response = await apiClient.post<User>(`/v1/users/${id}/toggle-status`);
+    const response = await apiClient.post<User>(`/v1/admin/users/${id}/toggle-status`);
     return response.data;
   },
 
@@ -119,7 +119,7 @@ export const userService = {
     if (params.sort_by) queryParams.set('sort_by', params.sort_by);
     if (params.sort_dir) queryParams.set('sort_dir', params.sort_dir);
 
-    const response = await apiClient.get<UserListResponse>(`/v1/users/deleted?${queryParams.toString()}`);
+    const response = await apiClient.get<UserListResponse>(`/v1/admin/users/deleted?${queryParams.toString()}`);
     return response.data;
   },
 
@@ -127,7 +127,7 @@ export const userService = {
    * Restore deleted user
    */
   async restoreUser(id: string): Promise<User> {
-    const response = await apiClient.post<User>(`/v1/users/${id}/restore`);
+    const response = await apiClient.post<User>(`/v1/admin/users/${id}/restore`);
     return response.data;
   },
 };
